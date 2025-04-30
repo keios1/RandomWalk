@@ -9,51 +9,74 @@ public class RandomWalk : MonoBehaviour
     public Vector2 maxArea = new Vector2(10, 10);
     public float directionChangeInterval = 2f;
 
-    private Vector2[] directions = new Vector2[8];
     private Vector2 currentDirection;
+    private float pie = 3.1415f;
 
     private void Start()
     {
-        directions[0] = new Vector2(0, 1).normalized;   
-        directions[1] = new Vector2(1, 1).normalized;   
-        directions[2] = new Vector2(1, 0).normalized;   
-        directions[3] = new Vector2(0, -1).normalized;  
-        directions[4] = new Vector2(-1, -1).normalized;
-        directions[5] = new Vector2(-1, 0).normalized;  
-        directions[6] = new Vector2(-1, 1).normalized; 
-        directions[7] = new Vector2(1, -1).normalized;  
-        
+        RandomSelect(); 
         StartCoroutine(WalkFor3Seconds());
     }
 
     private void Update()
     {
-        if(transform.position.x < minArea.x || transform.position.x > maxArea.x ||
-            transform.position.y < minArea.y || transform.position.y > maxArea.y)
+        Vector2 currentPosition = transform.position;
+        Vector2 nextPosition = currentPosition + currentDirection * moveSpeed * Time.deltaTime;
+
+        bool hitWall = false;
+        Vector2 normal = Vector2.zero;
+
+        if (nextPosition.x < minArea.x)
         {
-            Debug.Log("지역 범위 밖");
+            hitWall = true;
+            normal = Vector2.right;
+            nextPosition.x = minArea.x; 
         }
-        else
+        else if (nextPosition.x > maxArea.x)
         {
-            transform.Translate(currentDirection * moveSpeed * Time.deltaTime);
+            hitWall = true;
+            normal = Vector2.left;
+            nextPosition.x = maxArea.x;
         }
-        
+
+        if (nextPosition.y < minArea.y)
+        {
+            hitWall = true;
+            normal = Vector2.up;
+            nextPosition.y = minArea.y;
+        }
+        else if (nextPosition.y > maxArea.y)
+        {
+            hitWall = true;
+            normal = Vector2.down;
+            nextPosition.y = maxArea.y;
+        }
+
+        if (hitWall)
+        {
+            currentDirection = Vector2.Reflect(currentDirection, normal).normalized;
+        }
+
+        transform.position = nextPosition;
     }
 
     IEnumerator WalkFor3Seconds()
     {
-        while (true)  
+        while (true)
         {
+            yield return new WaitForSeconds(directionChangeInterval);
             RandomSelect();
-
-            yield return new WaitForSeconds(3f);
-            
         }
     }
 
     void RandomSelect()
     {
-        int num = Random.Range(0, 8);  
-        currentDirection = directions[num];  
+        float angle = Random.Range(0f, 360f);
+        float radian = angle * (pie/180f);
+
+        float x = Mathf.Cos(radian);
+        float y = Mathf.Sin(radian);
+
+        currentDirection = new Vector2(x, y).normalized;
     }
 }
