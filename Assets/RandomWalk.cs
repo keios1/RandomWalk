@@ -69,6 +69,16 @@ public class RandomWalk : MonoBehaviour
         }
     }
 
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            Debug.Log("Game Over");
+            Time.timeScale = 0f;
+                                 
+        }
+    }
+
     void RandomSelect()
     {
         float angle = Random.Range(0f, 360f);
